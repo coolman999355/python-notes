@@ -1,18 +1,13 @@
-
-
-
-
-
 import json
 
 print("Welcome to My Notes\n")
 
-def ask_title_notes():
+def get_note_input():
     title = input("What is the title: ")
     note = input("What is the note: ")
     return title, note
 
-def save(dictionary):
+def save_note(note_dict):
     try:
         with open("notes.json", "r", encoding="utf-8") as file:
             try:
@@ -22,15 +17,16 @@ def save(dictionary):
     except FileNotFoundError:
         notes = []
 
-    notes.append(dictionary)
+    notes.append(note_dict)
+
     with open("notes.json", "w", encoding="utf-8") as file:
         json.dump(notes, file, indent=4)
 
-class Read:
+class NotesManager:
     def __init__(self):
         self.data = []
 
-    def read(self):
+    def load_notes(self):
         """Load notes safely, even if file is empty or invalid"""
         try:
             with open("notes.json", "r", encoding="utf-8") as f:
@@ -41,12 +37,10 @@ class Read:
         except FileNotFoundError:
             self.data = []
 
-    def humanify(self, title_class):
+    def get_note_by_title(self, title):
         for note_dict in self.data:
-            if title_class in note_dict:
-                self.title = title_class
-                self.note = note_dict[title_class]
-                return self.title, self.note
+            if title in note_dict:
+                return title, note_dict[title]
         return None, None
 
     def print_all_titles(self):
@@ -59,8 +53,8 @@ class Read:
             for key in note_dict.keys():
                 print(f"{idx}. {key}")
 
-reader = Read()
-reader.read()
+manager = NotesManager()
+manager.load_notes()
 
 while True:
     print("\nMenu:")
@@ -72,18 +66,18 @@ while True:
     choice = input("Choose an option: ")
 
     if choice == "1":
-        title, note = ask_title_notes()
-        dic = {title: note}
-        save(dic)
-        reader.read()  
+        title, note = get_note_input()
+        note_dict = {title: note}
+        save_note(note_dict)
+        manager.load_notes()
         print(f"Note '{title}' saved!")
 
     elif choice == "2":
-        reader.print_all_titles()
+        manager.print_all_titles()
 
     elif choice == "3":
         search_title = input("Enter the title to view: ")
-        title, note = reader.humanify(search_title)
+        title, note = manager.get_note_by_title(search_title)
         if title:
             print(f"\nTitle: {title}\nNote: {note}")
         else:
